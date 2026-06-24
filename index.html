@@ -380,7 +380,7 @@ const YMD = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}
 const parseDate = (s) => { const d = new Date(s); return isNaN(d) ? null : d; };
 const sameDay = (a, b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
 const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-const WD_ES = ["Do","Lu","Ma","Mi","Ju","Vi","Sá"];
+const WD_ES = ["Lu","Ma","Mi","Ju","Vi","Sá","Do"];
 /* ordena por importancia (cuadrante) y luego por hora */
 const byImportance = (a, b) => {
   const ra = QUAD_RANK[a.quadrant ?? "null"], rb = QUAD_RANK[b.quadrant ?? "null"];
