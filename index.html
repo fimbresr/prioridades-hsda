@@ -686,9 +686,19 @@ function MatrixChip({ t, q, open, onToggleOpen, onDragStart, onMove, onDone, onR
 }
 
 /* ---------------- Mi día (agenda automática) ---------------- */
+/* Una tarea pertenece a "hoy" si no tiene fecha, si es para hoy, o si ya está vencida.
+   Las programadas para OTRO día (futuro) NO aparecen en Mi día: solo en el Calendario,
+   hasta que llegue el día que les corresponde. */
+const isForToday = (t, now = new Date()) => {
+  if (!t.due) return true;
+  const d = parseDate(t.due);
+  if (!d) return true;
+  return sameDay(d, now) || d < now;
+};
+
 function buildAgenda(tasks, start) {
-  const active = tasks.filter(t => t.status !== "hecha");
-  const doneToday = tasks.filter(t => t.status === "hecha");
+  const active = tasks.filter(t => t.status !== "hecha" && isForToday(t));
+  const doneToday = tasks.filter(t => t.status === "hecha" && isForToday(t));
   const doT = active.filter(t => t.quadrant === "do").sort(byDue);
   const planT = active.filter(t => t.quadrant === "plan").sort(byDue);
   const delegT = active.filter(t => t.quadrant === "deleg").sort(byDue);
@@ -709,9 +719,16 @@ function buildAgenda(tasks, start) {
 
 function DiaView({ tasks, start, setStart, toggleDone, onPick }) {
   const { timed, delegT, delT, doneToday, total } = useMemo(() => buildAgenda(tasks, start), [tasks, start]);
+  const scheduledLater = useMemo(() => tasks.filter(t => t.status !== "hecha" && !isForToday(t)).length, [tasks]);
 
   if (total === 0 && doneToday.length === 0) {
-    return <div className="empty">{I.cal}<p>Aún no hay tareas clasificadas.<br/>Clasifícalas en la Matriz y aquí aparecerá tu día.</p></div>;
+    return (
+      <div className="empty">{I.cal}
+        <p>{scheduledLater > 0
+          ? <>Hoy no hay tareas pendientes.<br/>Tienes <b>{scheduledLater}</b> programada(s) para otros días. míralas en el <b>Calendario</b>.</>
+          : <>Aún no hay tareas clasificadas.<br/>Clasifícalas en la Matriz y aquí aparecerá tu día.</>}</p>
+      </div>
+    );
   }
 
   return (
