@@ -259,6 +259,48 @@
   .sheet-btn.danger { color: var(--do); }
   .sheet-close { width: 100%; margin-top: 9px; border: 0; background: transparent; color: var(--ink-faint); font-family: inherit; font-size: .85rem; padding: 8px; cursor: pointer; }
 
+  /* Calendario */
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
+  .cal-month { font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em; }
+  .cal-nav { display: flex; gap: 6px; }
+  .cal-nav-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink-soft); display: grid; place-items: center; cursor: pointer; transition: transform .15s, color .2s; }
+  .cal-nav-btn:active { transform: scale(.9); }
+  .cal-nav-btn svg { width: 16px; height: 16px; }
+  .cal-nav-btn.today { width: auto; padding: 0 12px; font-size: .78rem; font-weight: 800; color: var(--brand); }
+
+  .cal-wrap { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px; box-shadow: var(--shadow-sm); margin-bottom: 18px; }
+  .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; }
+  .cal-wd { text-align: center; font-size: .68rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: var(--ink-faint); padding: 4px 0; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-cell { aspect-ratio: 1 / 1; min-height: 38px; border-radius: 10px; border: 1.5px solid transparent; background: var(--input-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: border-color .15s, background .2s, transform .12s; position: relative; }
+  .cal-cell:active { transform: scale(.94); }
+  .cal-cell.out { opacity: .35; }
+  .cal-cell .dnum { font-size: .82rem; font-weight: 500; color: var(--ink-soft); }
+  .cal-cell.has .dnum { font-weight: 800; color: var(--ink); }
+  .cal-cell.sel { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, var(--card)); box-shadow: 0 4px 14px -6px var(--brand); }
+  .cal-cell.sel .dnum { color: var(--brand); }
+  .cal-cell.today .dnum { color: var(--do); }
+  .cal-cell.today.sel .dnum { color: var(--brand); }
+  .cal-cell .dots { display: flex; gap: 2px; height: 5px; }
+  .cal-cell .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .cal-cell .dot.do    { background: var(--do); }
+  .cal-cell .dot.plan  { background: var(--plan); }
+  .cal-cell .dot.deleg { background: var(--deleg); }
+  .cal-cell .dot.del   { background: var(--del); }
+
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .cal-legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--ink-soft); }
+  .cal-legend-item .sw { width: 9px; height: 9px; border-radius: 50%; }
+  .cal-legend-item .sw.do    { background: var(--do); }
+  .cal-legend-item .sw.plan  { background: var(--plan); }
+  .cal-legend-item .sw.deleg { background: var(--deleg); }
+  .cal-legend-item .sw.del   { background: var(--del); }
+
+  .cal-day-title { display: flex; align-items: baseline; gap: 8px; margin: 2px 2px 12px; }
+  .cal-day-title .big { font-weight: 800; font-size: 1.1rem; }
+  .cal-day-title .small { font-size: .8rem; color: var(--ink-soft); }
+  .cal-day-title .n { margin-left: auto; font-size: .72rem; font-weight: 800; color: var(--ink-faint); background: var(--card); border: 1px solid var(--line); border-radius: 100px; padding: 2px 9px; }
+
   .foot { text-align: center; font-size: .72rem; color: var(--ink-faint); margin-top: 14px; }
 </style>
 </head>
@@ -286,6 +328,9 @@ const I = {
   undo:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6M3 13a9 9 0 1 0 3-7.7"/></svg>,
   chevD:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>,
   chevU:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 15l6-6 6 6"/></svg>,
+  chevL:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>,
+  chevR:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>,
+  month:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v4M16 3v4"/><circle cx="7.5" cy="13.5" r=".7" fill="currentColor" stroke="none"/><circle cx="12" cy="13.5" r=".7" fill="currentColor" stroke="none"/><circle cx="16.5" cy="13.5" r=".7" fill="currentColor" stroke="none"/><circle cx="7.5" cy="17" r=".7" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg>,
 };
 
 /* Opciones de duración estimada (minutos) */
@@ -329,6 +374,33 @@ const byDue = (a, b) => {
   return a.order - b.order;
 };
 
+/* ---------------- Calendario: utilidades de fecha ---------------- */
+const QUAD_RANK = { do: 0, plan: 1, deleg: 2, del: 3, null: 4 };
+const YMD = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const parseDate = (s) => { const d = new Date(s); return isNaN(d) ? null : d; };
+const sameDay = (a, b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const WD_ES = ["Do","Lu","Ma","Mi","Ju","Vi","Sá"];
+/* ordena por importancia (cuadrante) y luego por hora */
+const byImportance = (a, b) => {
+  const ra = QUAD_RANK[a.quadrant ?? "null"], rb = QUAD_RANK[b.quadrant ?? "null"];
+  if (ra !== rb) return ra - rb;
+  return byDue(a, b);
+};
+/* construye la matriz 6x7 del mes (lunes primero) */
+function monthMatrix(year, month) {
+  const first = new Date(year, month, 1);
+  const startDow = (first.getDay() + 6) % 7; // 0 = lunes
+  const start = new Date(year, month, 1 - startDow);
+  const cells = [];
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    cells.push(d);
+  }
+  return cells;
+}
+
 /* ---------------- App ---------------- */
 function App() {
   const [tasks, setTasks] = useState(load);
@@ -342,6 +414,8 @@ function App() {
   const [sheet, setSheet] = useState(null);   // tarea seleccionada (móvil)
   const [over, setOver] = useState(null);      // cuadrante con drag encima
   const dragId = useRef(null);
+  const [calMonth, setCalMonth] = useState(() => { const n = new Date(); return { y: n.getFullYear(), m: n.getMonth() }; });
+  const [calSel, setCalSel] = useState(() => YMD(new Date()));
 
   useEffect(() => { save(tasks); }, [tasks]);
   useEffect(() => { document.body.dataset.theme = theme; localStorage.setItem("prioridades-theme", theme); }, [theme]);
@@ -407,6 +481,7 @@ function App() {
         <div className="tabs">
           <button className={"tab" + (tab==="matriz"?" active":"")} onClick={() => setTab("matriz")}>{I.grid} Matriz</button>
           <button className={"tab" + (tab==="dia"?" active":"")} onClick={() => setTab("dia")}>{I.cal} Mi día</button>
+          <button className={"tab" + (tab==="calendario"?" active":"")} onClick={() => setTab("calendario")}>{I.month} Calendario</button>
           <button className={"tab" + (tab==="bandeja"?" active":"")} onClick={() => setTab("bandeja")}>
             {I.inbox} Bandeja {counts.inbox>0 && <span className="count">{counts.inbox}</span>}
           </button>
@@ -431,6 +506,14 @@ function App() {
 
         {tab === "dia" && (
           <DiaView tasks={tasks} start={start} setStart={setStart} toggleDone={toggleDone} onPick={setSheet} />
+        )}
+
+        {tab === "calendario" && (
+          <CalendarView
+            tasks={tasks} calMonth={calMonth} setCalMonth={setCalMonth}
+            calSel={calSel} setCalSel={setCalSel}
+            toggleDone={toggleDone} onPick={setSheet}
+          />
         )}
 
         <div className="foot">Hospital San Diego de Alcalá · Datos guardados solo en este dispositivo</div>
@@ -703,6 +786,135 @@ function DiaView({ tasks, start, setStart, toggleDone, onPick }) {
           ))}
         </div>
       )}
+    </>
+  );
+}
+
+/* ---------------- Calendario ---------------- */
+function CalendarView({ tasks, calMonth, setCalMonth, calSel, setCalSel, toggleDone, onPick }) {
+  const today = new Date();
+  const todayY = today.getFullYear(), todayM = today.getMonth(), todayD = today.getDate();
+
+  /* mapa ymd -> { lista de tareas, set de cuadrantes } */
+  const byDay = useMemo(() => {
+    const map = {};
+    tasks.forEach(t => {
+      if (t.status === "hecha") return;
+      const d = parseDate(t.due);
+      if (!d) return;
+      const key = YMD(d);
+      if (!map[key]) map[key] = { list: [], quads: new Set() };
+      map[key].list.push(t);
+      map[key].quads.add(t.quadrant || "null");
+    });
+    return map;
+  }, [tasks]);
+
+  const cells = monthMatrix(calMonth.y, calMonth.m);
+
+  const shiftMonth = (delta) => {
+    let m = calMonth.m + delta, y = calMonth.y;
+    if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
+    setCalMonth({ y, m });
+  };
+
+  const goToday = () => {
+    const n = new Date();
+    setCalMonth({ y: n.getFullYear(), m: n.getMonth() });
+    setCalSel(YMD(n));
+  };
+
+  const selDate = parseDate(calSel);
+  const selDayItems = (byDay[calSel]?.list || []).slice().sort(byImportance);
+
+  const selLabel = selDate
+    ? `${selDate.getDate()} de ${MONTHS_ES[selDate.getMonth()].toLowerCase()}`
+    : "";
+  const selIsToday = selDate && sameDay(selDate, today);
+  const selIsPast = selDate && !selIsToday && selDate < today && sameDay(selDate, new Date(selDate.getTime()));
+
+  return (
+    <>
+      {/* Encabezado con mes y navegación */}
+      <div className="cal-head">
+        <div className="cal-month">{MONTHS_ES[calMonth.m]} {calMonth.y}</div>
+        <div className="cal-nav">
+          <button className="cal-nav-btn today" onClick={goToday} aria-label="Ir a hoy">Hoy</button>
+          <button className="cal-nav-btn" onClick={() => shiftMonth(-1)} aria-label="Mes anterior">{I.chevL}</button>
+          <button className="cal-nav-btn" onClick={() => shiftMonth(1)} aria-label="Mes siguiente">{I.chevR}</button>
+        </div>
+      </div>
+
+      {/* Rejilla del calendario */}
+      <div className="cal-wrap">
+        <div className="cal-week">
+          {WD_ES.map(w => <div key={w} className="cal-wd">{w}</div>)}
+        </div>
+        <div className="cal-grid">
+          {cells.map((d, i) => {
+            const key = YMD(d);
+            const info = byDay[key];
+            const out = d.getMonth() !== calMonth.m;
+            const isToday = d.getFullYear()===todayY && d.getMonth()===todayM && d.getDate()===todayD;
+            const isSel = key === calSel;
+            const quads = info ? Array.from(info.quads).filter(q => q !== "null") : [];
+            return (
+              <div key={i}
+                   className={"cal-cell" + (out ? " out" : "") + (info ? " has" : "") + (isSel ? " sel" : "") + (isToday ? " today" : "")}
+                   onClick={() => setCalSel(key)}>
+                <span className="dnum">{d.getDate()}</span>
+                {quads.length > 0 && (
+                  <span className="dots">
+                    {quads.map(q => <span key={q} className={"dot " + q} />)}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="cal-legend">
+          <span className="cal-legend-item"><span className="sw do" />Hacer ya</span>
+          <span className="cal-legend-item"><span className="sw plan" />Agendar</span>
+          <span className="cal-legend-item"><span className="sw deleg" />Delegar</span>
+          <span className="cal-legend-item"><span className="sw del" />Eliminar</span>
+        </div>
+      </div>
+
+      {/* Lista de tareas del día seleccionado */}
+      <div className="cal-day-title">
+        <span className="big">{selLabel || "Selecciona un día"}</span>
+        <span className="small">{selIsToday ? "Hoy" : (selDate ? (selDate < today ? "Fecha pasada" : "") : "")}</span>
+        {selDayItems.length > 0 && <span className="n">{selDayItems.length}</span>}
+      </div>
+
+      {selDayItems.length === 0 ? (
+        <div className="empty">{I.month}<p>{selDate ? "Sin tareas programadas para este día." : "Toca un día del calendario para ver sus tareas."}</p></div>
+      ) : (
+        <div className="day-block">
+          <div className="chips">
+            {selDayItems.map(t => {
+              const Q = QUADS[t.quadrant] || { label: "SIN CLASIFICAR", key: "del", cls: "q-del" };
+              const di = dueInfo(t.due);
+              return (
+                <div key={t.id} className="agenda-item" style={{ "--ac": "var(--" + Q.key + ")" }} onClick={() => onPick(t)}>
+                  <div className="agenda-time" style={{ minWidth: 40 }}>{Q.icon}</div>
+                  <div className="agenda-body">
+                    <div className="ttl">{t.title}</div>
+                    <div className="meta">{Q.label}{di ? " · " + di.text : ""}{t.note ? " · " + t.note : ""}</div>
+                  </div>
+                  <div className="acts" onClick={e => e.stopPropagation()}>
+                    <button className="mini ok" onClick={() => toggleDone(t.id)} aria-label="Hecha">{I.check}</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="qa-hint" style={{ marginTop: 14, textAlign: "center" }}>
+        Aquí aparecen las tareas con <b>fecha límite</b>, ordenadas por importancia. Asigna fecha desde la <b>Bandeja</b>.
+      </div>
     </>
   );
 }
