@@ -263,6 +263,9 @@
   .sheet-opt:active { transform: scale(.96); }
   .sheet-opt small { font-weight: 500; font-size: .68rem; opacity: .8; }
   .sheet-opt .sheet-q { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; font-size: .62rem; font-weight: 800; color: #fff; background: var(--qc); margin-right: 6px; }
+  .sheet-opt.current { outline: 2.5px solid var(--qc); outline-offset: 1px; box-shadow: 0 4px 14px -6px var(--qc); }
+  .sheet-opt .sheet-here { font-size: .62rem; font-weight: 800; color: var(--qd); background: color-mix(in srgb, var(--qc) 18%, transparent); border-radius: 100px; padding: 1px 7px; margin-top: 2px; align-self: flex-start; }
+  .sheet-hint { font-size: .72rem; color: var(--ink-soft); margin-bottom: 11px; padding: 7px 10px; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--line); }
   .sheet-opt.q-do    { --qc: var(--do);    --qd: var(--do-deep);    --qsoft: var(--do-soft);    --qline: color-mix(in srgb, var(--do) 30%, transparent); }
   .sheet-opt.q-plan  { --qc: var(--plan);  --qd: var(--plan-deep);  --qsoft: var(--plan-soft);  --qline: color-mix(in srgb, var(--plan) 30%, transparent); }
   .sheet-opt.q-deleg { --qc: var(--deleg); --qd: var(--deleg-deep); --qsoft: var(--deleg-soft); --qline: color-mix(in srgb, var(--deleg) 30%, transparent); }
@@ -543,9 +546,9 @@ function App() {
 
       {sheet && (
         <Sheet
-          task={sheet}
+          task={tasks.find(t => t.id === sheet.id) || sheet}
           onClose={() => setSheet(null)}
-          onMove={(q) => { move(sheet.id, q); setSheet(null); }}
+          onMove={(q) => { move(sheet.id, q); }}
           onDone={() => { toggleDone(sheet.id); setSheet(null); }}
           onRemove={() => { remove(sheet.id); setSheet(null); }}
         />
@@ -989,12 +992,15 @@ function Sheet({ task, onClose, onMove, onDone, onRemove }) {
       <div className="sheet" onClick={e => e.stopPropagation()}>
         <h3>{task.title}</h3>
         <div className="sub">{fmtMins(task.mins || 30)}{di ? " · " + di.text : ""}{task.note ? " · " + task.note : ""}</div>
+        <div className="sheet-hint">Toca un cuadrante para mover la tarea · puedes moverla las veces que quieras</div>
         <div className="sheet-grid">
           {QUAD_GRID.map(q => {
             const Q = QUADS[q];
+            const current = task.quadrant === q;
             return (
-              <button key={q} className={"sheet-opt " + Q.cls} onClick={() => onMove(q)}>
+              <button key={q} className={"sheet-opt " + Q.cls + (current ? " current" : "")} onClick={() => onMove(q)}>
                 <span className="sheet-q">Q{Q.num}</span>{Q.label}<small>{Q.sub}</small>
+                {current && <span className="sheet-here">✓ Aquí</span>}
               </button>
             );
           })}
