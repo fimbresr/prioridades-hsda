@@ -170,16 +170,21 @@
   .mini svg { width: 15px; height: 15px; }
   .mini.ok:hover, .mini.ok.on { color: #fff; background: var(--plan); border-color: var(--plan); }
 
-  /* Matriz con ejes Importante/Urgente */
-  .matrix-shell { display: flex; gap: 6px; align-items: stretch; }
-  .axis-y { width: 22px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 2px 0; }
-  .axis-y .axis-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: .64rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
-  .axis-y .axis-label.faint { opacity: .55; }
-  .matrix-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-  .axis-x { display: flex; justify-content: space-between; padding: 0 2px; }
-  .axis-x .axis-label { font-size: .64rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); }
-  .axis-x .axis-label.faint { opacity: .55; }
-  .matrix { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  /* Matriz con ejes Importante/Urgente (layout tipo tabla) */
+  .matrix-table { display: grid; grid-template-columns: 26px minmax(0,1fr) minmax(0,1fr); grid-template-rows: auto auto auto; gap: 8px; }
+  .mt-corner { grid-column: 1; grid-row: 1; }
+  .mt-colhead { grid-row: 1; display: grid; place-items: center; }
+  .mt-colhead:nth-of-type(2) { grid-column: 2; }
+  .mt-colhead:nth-of-type(3) { grid-column: 3; }
+  .mt-rowhead { grid-column: 1; display: grid; place-items: center; }
+  /* pastillas de eje resaltadas */
+  .ax-pill { font-size: .62rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; border-radius: 100px; padding: 5px 8px; white-space: nowrap; box-shadow: 0 2px 6px -2px rgba(0,0,0,.25); }
+  .ax-pill.important   { background: var(--do);    color: #fff; }
+  .ax-pill.noimportant { background: var(--del);   color: #fff; }
+  .ax-pill.urgent      { background: var(--do-deep); color: #fff; }
+  .ax-pill.nourgent    { background: var(--plan-deep); color: #fff; }
+  .mt-colhead .ax-pill { writing-mode: horizontal-tb; }
+  .mt-rowhead .ax-pill { writing-mode: vertical-rl; transform: rotate(180deg); }
   .quad { min-width: 0; border-radius: 18px; padding: 12px; min-height: 150px; border: 1.5px solid var(--qline); background: var(--qsoft); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: outline .15s, transform .15s; }
   .quad.q-do    { --qc: var(--do);    --qd: var(--do-deep);    --qsoft: var(--do-soft);    --qline: color-mix(in srgb, var(--do) 30%, transparent); }
   .quad.q-plan  { --qc: var(--plan);  --qd: var(--plan-deep);  --qsoft: var(--plan-soft);  --qline: color-mix(in srgb, var(--plan) 30%, transparent); }
@@ -611,14 +616,47 @@ function BandejaView({ title, setTitle, note, setNote, due, setDue, mins, setMin
 }
 
 /* ---------------- Matriz ---------------- */
-/* Orden de dibujo en la rejilla 2x2 (fila, columna):
-   arriba-izq = Q2 (Agendar)  ·  arriba-der = Q1 (Hacer ya)
-   abajo-izq  = Q4 (Eliminar) ·  abajo-der  = Q3 (Delegar)
-   Así coinciden los ejes: Importante↑ arriba, Urgente→ derecha. */
-const QUAD_GRID = ["plan","do","del","deleg"];
+/* Orden visual de los cuadrantes (Q1 Q2 arriba · Q3 Q4 abajo, izq→der):
+   arriba-izq = Q1 (Hacer ya) · arriba-der = Q2 (Agendar)
+   abajo-izq  = Q3 (Delegar)  · abajo-der  = Q4 (Eliminar)
+   Ejes: Importante↑ arriba, Urgente← izquierda. */
+const QUAD_GRID = ["do","plan","deleg","del"];
 
 function MatrixView({ inbox, pending, counts, onPick, onDragStart, onDropQuad, over, setOver, toggleDone, move, remove }) {
   const [openId, setOpenId] = useState(null);
+  const renderQuad = (q, col, row) => {
+    const Q = QUADS[q];
+    const items = pending(q);
+    return (
+      <div key={q}
+           className={"quad " + Q.cls + (over === q ? " over" : "")}
+           style={{ gridColumn: col, gridRow: row }}
+           onDragOver={(e) => { e.preventDefault(); setOver(q); }}
+           onDragLeave={() => setOver(o => o === q ? null : o)}
+           onDrop={(e) => { e.preventDefault(); onDropQuad(q); }}>
+        <div className="quad-head">
+          <div>
+            <span className="quad-num">Q{Q.num}</span>
+            <span className="quad-tag">{Q.icon}{Q.label}</span>
+            <div className="quad-sub" style={{ marginTop: 4 }}>{Q.sub}</div>
+          </div>
+          {items.length > 0 && <span className="quad-n">{items.length}</span>}
+        </div>
+        {items.length === 0 ? (
+          <div className="quad-empty">Suelta aquí → {Q.label}</div>
+        ) : (
+          <div className="chips">
+            {items.map(t => (
+              <MatrixChip key={t.id} t={t} q={q}
+                open={openId === t.id}
+                onToggleOpen={() => setOpenId(o => o === t.id ? null : t.id)}
+                onDragStart={onDragStart} onMove={move} onDone={toggleDone} onRemove={remove} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
   return (
     <>
       {inbox.length > 0 && (
@@ -630,59 +668,25 @@ function MatrixView({ inbox, pending, counts, onPick, onDragStart, onDropQuad, o
         </div>
       )}
 
-      <div className="matrix-shell">
-        {/* Eje vertical: Importante */}
-        <div className="axis-y">
-          <span className="axis-label">Importante ↑</span>
-          <span className="axis-label faint">No importante ↓</span>
-        </div>
+      <div className="matrix-table">
+        {/* Esquina vacía */}
+        <div className="mt-corner" />
+        {/* Encabezado de columnas: Urgente | No urgente */}
+        <div className="mt-colhead"><span className="ax-pill urgent">Urgente</span></div>
+        <div className="mt-colhead"><span className="ax-pill nourgent">No urgente</span></div>
 
-        <div className="matrix-body">
-          {/* Eje horizontal */}
-          <div className="axis-x">
-            <span className="axis-label faint">← No urgente</span>
-            <span className="axis-label">Urgente →</span>
-          </div>
+        {/* Fila Importante */}
+        <div className="mt-rowhead"><span className="ax-pill important">Importante</span></div>
+        {renderQuad("do", 2, 2)}
+        {renderQuad("plan", 3, 2)}
 
-          {/* Rejilla 2x2 */}
-          <div className="matrix">
-            {QUAD_GRID.map(q => {
-              const Q = QUADS[q];
-              const items = pending(q);
-              return (
-                <div key={q}
-                     className={"quad " + Q.cls + (over === q ? " over" : "")}
-                     onDragOver={(e) => { e.preventDefault(); setOver(q); }}
-                     onDragLeave={() => setOver(o => o === q ? null : o)}
-                     onDrop={(e) => { e.preventDefault(); onDropQuad(q); }}>
-                  <div className="quad-head">
-                    <div>
-                      <span className="quad-num">Q{Q.num}</span>
-                      <span className="quad-tag">{Q.icon}{Q.label}</span>
-                      <div className="quad-sub" style={{ marginTop: 4 }}>{Q.sub}</div>
-                    </div>
-                    {items.length > 0 && <span className="quad-n">{items.length}</span>}
-                  </div>
-                  {items.length === 0 ? (
-                    <div className="quad-empty">Suelta aquí → {Q.label}</div>
-                  ) : (
-                    <div className="chips">
-                      {items.map(t => (
-                        <MatrixChip key={t.id} t={t} q={q}
-                          open={openId === t.id}
-                          onToggleOpen={() => setOpenId(o => o === t.id ? null : t.id)}
-                          onDragStart={onDragStart} onMove={move} onDone={toggleDone} onRemove={remove} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* Fila No importante */}
+        <div className="mt-rowhead"><span className="ax-pill noimportant">No importante</span></div>
+        {renderQuad("deleg", 2, 3)}
+        {renderQuad("del", 3, 3)}
       </div>
       <div className="qa-hint" style={{ marginTop: 14, textAlign: "center" }}>
-        Arrastra cada tarea al cuadrante según su <b>urgencia</b> (eje horizontal) e <b>importancia</b> (eje vertical). Se clasifica sola en Q1–Q4.
+        Arrastra cada tarea al cuadrante según su <b>urgencia</b> (columna) e <b>importancia</b> (fila). Q1–Q4 de izquierda a derecha y de arriba abajo.
       </div>
     </>
   );

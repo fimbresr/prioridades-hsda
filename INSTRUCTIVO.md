@@ -109,16 +109,17 @@ La **Matriz** distribuye tus tareas en 4 cuadrantes según **urgencia** (eje hor
 ### Cómo leer la matriz
 
 ```
-                     ← No urgente        Urgente →
+                    Urgente          No urgente
                  ┌─────────────────┬─────────────────┐
-  Importante ↑   │   Q2 · AGENDAR  │  Q1 · HACER YA  │
+  Importante     │  Q1 · HACER YA  │  Q2 · AGENDAR   │
                  ├─────────────────┼─────────────────┤
-  No importante ↓│  Q4 · ELIMINAR  │  Q3 · DELEGAR   │
+  No importante  │  Q3 · DELEGAR   │  Q4 · ELIMINAR  │
                  └─────────────────┴─────────────────┘
 ```
 
-- **Eje vertical** (↑↓): arriba = Importante · abajo = No importante
-- **Eje horizontal** (←→): izquierda = No urgente · derecha = Urgente
+- **Columnas** (←→): izquierda = Urgente · derecha = No urgente
+- **Filas** (↑↓): arriba = Importante · abajo = No importante
+- Las etiquetas de los ejes aparecen como **pastillas de color resaltadas** para que se vean claro al clasificar.
 - Cada cuadrante tiene su **badge Q1–Q4** y su etiqueta (Hacer ya, Agendar, Delegar, Eliminar).
 
 ### Cómo clasificar una tarea
