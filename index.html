@@ -170,16 +170,24 @@
   .mini svg { width: 15px; height: 15px; }
   .mini.ok:hover, .mini.ok.on { color: #fff; background: var(--plan); border-color: var(--plan); }
 
-  /* Matrix */
-  .axis-top { text-align: center; font-size: .74rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
-  .matrix { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  /* Matriz con ejes Importante/Urgente */
+  .matrix-shell { display: flex; gap: 6px; align-items: stretch; }
+  .axis-y { width: 22px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 2px 0; }
+  .axis-y .axis-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: .64rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
+  .axis-y .axis-label.faint { opacity: .55; }
+  .matrix-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .axis-x { display: flex; justify-content: space-between; padding: 0 2px; }
+  .axis-x .axis-label { font-size: .64rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); }
+  .axis-x .axis-label.faint { opacity: .55; }
+  .matrix { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
   .quad { min-width: 0; border-radius: 18px; padding: 12px; min-height: 150px; border: 1.5px solid var(--qline); background: var(--qsoft); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: outline .15s, transform .15s; }
   .quad.q-do    { --qc: var(--do);    --qd: var(--do-deep);    --qsoft: var(--do-soft);    --qline: color-mix(in srgb, var(--do) 30%, transparent); }
   .quad.q-plan  { --qc: var(--plan);  --qd: var(--plan-deep);  --qsoft: var(--plan-soft);  --qline: color-mix(in srgb, var(--plan) 30%, transparent); }
   .quad.q-deleg { --qc: var(--deleg); --qd: var(--deleg-deep); --qsoft: var(--deleg-soft); --qline: color-mix(in srgb, var(--deleg) 30%, transparent); }
   .quad.q-del   { --qc: var(--del);   --qd: var(--del-deep);   --qsoft: var(--del-soft);   --qline: color-mix(in srgb, var(--del) 35%, transparent); }
   .quad.over { outline: 2.5px dashed var(--qc); outline-offset: 2px; transform: translateY(-2px); }
-  .quad-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+  .quad-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 9px; gap: 6px; }
+  .quad-num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; font-size: .68rem; font-weight: 800; color: #fff; background: var(--qc); margin-right: 6px; vertical-align: middle; }
   .quad-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; letter-spacing: .03em; color: #fff; background: var(--qc); padding: 4px 9px; border-radius: 100px; }
   .quad-tag svg { width: 12px; height: 12px; }
   .quad-sub { font-size: .68rem; color: var(--qd); font-weight: 500; opacity: .85; }
@@ -249,6 +257,7 @@
   .sheet-opt { border: 1.5px solid var(--qline); background: var(--qsoft); color: var(--qd); border-radius: 14px; padding: 12px; font-family: inherit; font-weight: 800; font-size: .82rem; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 3px; transition: transform .15s; }
   .sheet-opt:active { transform: scale(.96); }
   .sheet-opt small { font-weight: 500; font-size: .68rem; opacity: .8; }
+  .sheet-opt .sheet-q { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; font-size: .62rem; font-weight: 800; color: #fff; background: var(--qc); margin-right: 6px; }
   .sheet-opt.q-do    { --qc: var(--do);    --qd: var(--do-deep);    --qsoft: var(--do-soft);    --qline: color-mix(in srgb, var(--do) 30%, transparent); }
   .sheet-opt.q-plan  { --qc: var(--plan);  --qd: var(--plan-deep);  --qsoft: var(--plan-soft);  --qline: color-mix(in srgb, var(--plan) 30%, transparent); }
   .sheet-opt.q-deleg { --qc: var(--deleg); --qd: var(--deleg-deep); --qsoft: var(--deleg-soft); --qline: color-mix(in srgb, var(--deleg) 30%, transparent); }
@@ -338,11 +347,19 @@ const MINS = [5, 10, 15, 30, 45, 60, 90, 120];
 const fmtMins = (m) => m >= 60 ? (m % 60 === 0 ? (m/60) + " h" : Math.floor(m/60) + " h " + (m%60) + " m") : m + " min";
 
 /* ---------------- Cuadrantes ---------------- */
+/* Modelo clásico de Eisenhower:
+   Eje vertical = Importante (arriba) / No importante (abajo)
+   Eje horizontal = Urgente (derecha) / No urgente (izquierda)
+   Q1 = Hacer ya  (urgente + importante)     — arriba derecha
+   Q2 = Agendar   (importante + no urgente)  — arriba izquierda
+   Q3 = Delegar   (urgente + no importante)  — abajo derecha
+   Q4 = Eliminar  (no urgente + no importante)— abajo izquierda
+   Al soltar una tarea en un cuadrante se asigna automáticamente su clasificación. */
 const QUADS = {
-  do:    { key:"do",    label:"HACER YA",  sub:"Urgente · Importante",     icon:I.bolt, cls:"q-do" },
-  plan:  { key:"plan",  label:"AGENDAR",   sub:"Importante · No urgente",  icon:I.star, cls:"q-plan" },
-  deleg: { key:"deleg", label:"DELEGAR",   sub:"Urgente · No importante",  icon:I.hand, cls:"q-deleg" },
-  del:   { key:"del",   label:"ELIMINAR",  sub:"Ni urgente ni importante", icon:I.trash, cls:"q-del" },
+  do:    { key:"do",    num:1, label:"HACER YA",  sub:"Urgente · Importante",      icon:I.bolt,  cls:"q-do",    urgent:true,  important:true  },
+  plan:  { key:"plan",  num:2, label:"AGENDAR",   sub:"Importante · No urgente",   icon:I.star,  cls:"q-plan",  urgent:false, important:true  },
+  deleg: { key:"deleg", num:3, label:"DELEGAR",   sub:"Urgente · No importante",   icon:I.hand,  cls:"q-deleg", urgent:true,  important:false },
+  del:   { key:"del",   num:4, label:"ELIMINAR",  sub:"Ni urgente ni importante",  icon:I.trash, cls:"q-del",   urgent:false, important:false },
 };
 const QUAD_ORDER = ["do","plan","deleg","del"];
 
@@ -594,6 +611,12 @@ function BandejaView({ title, setTitle, note, setNote, due, setDue, mins, setMin
 }
 
 /* ---------------- Matriz ---------------- */
+/* Orden de dibujo en la rejilla 2x2 (fila, columna):
+   arriba-izq = Q2 (Agendar)  ·  arriba-der = Q1 (Hacer ya)
+   abajo-izq  = Q4 (Eliminar) ·  abajo-der  = Q3 (Delegar)
+   Así coinciden los ejes: Importante↑ arriba, Urgente→ derecha. */
+const QUAD_GRID = ["plan","do","del","deleg"];
+
 function MatrixView({ inbox, pending, counts, onPick, onDragStart, onDropQuad, over, setOver, toggleDone, move, remove }) {
   const [openId, setOpenId] = useState(null);
   return (
@@ -607,42 +630,59 @@ function MatrixView({ inbox, pending, counts, onPick, onDragStart, onDropQuad, o
         </div>
       )}
 
-      <div className="axis-top">↑ Importante &nbsp;·&nbsp; Urgente →</div>
-      <div className="matrix">
-        {QUAD_ORDER.map(q => {
-          const Q = QUADS[q];
-          const items = pending(q);
-          return (
-            <div key={q}
-                 className={"quad " + Q.cls + (over === q ? " over" : "")}
-                 onDragOver={(e) => { e.preventDefault(); setOver(q); }}
-                 onDragLeave={() => setOver(o => o === q ? null : o)}
-                 onDrop={(e) => { e.preventDefault(); onDropQuad(q); }}>
-              <div className="quad-head">
-                <div>
-                  <span className="quad-tag">{Q.icon}{Q.label}</span>
-                  <div className="quad-sub" style={{ marginTop: 4 }}>{Q.sub}</div>
+      <div className="matrix-shell">
+        {/* Eje vertical: Importante */}
+        <div className="axis-y">
+          <span className="axis-label">Importante ↑</span>
+          <span className="axis-label faint">No importante ↓</span>
+        </div>
+
+        <div className="matrix-body">
+          {/* Eje horizontal */}
+          <div className="axis-x">
+            <span className="axis-label faint">← No urgente</span>
+            <span className="axis-label">Urgente →</span>
+          </div>
+
+          {/* Rejilla 2x2 */}
+          <div className="matrix">
+            {QUAD_GRID.map(q => {
+              const Q = QUADS[q];
+              const items = pending(q);
+              return (
+                <div key={q}
+                     className={"quad " + Q.cls + (over === q ? " over" : "")}
+                     onDragOver={(e) => { e.preventDefault(); setOver(q); }}
+                     onDragLeave={() => setOver(o => o === q ? null : o)}
+                     onDrop={(e) => { e.preventDefault(); onDropQuad(q); }}>
+                  <div className="quad-head">
+                    <div>
+                      <span className="quad-num">Q{Q.num}</span>
+                      <span className="quad-tag">{Q.icon}{Q.label}</span>
+                      <div className="quad-sub" style={{ marginTop: 4 }}>{Q.sub}</div>
+                    </div>
+                    {items.length > 0 && <span className="quad-n">{items.length}</span>}
+                  </div>
+                  {items.length === 0 ? (
+                    <div className="quad-empty">Suelta aquí → {Q.label}</div>
+                  ) : (
+                    <div className="chips">
+                      {items.map(t => (
+                        <MatrixChip key={t.id} t={t} q={q}
+                          open={openId === t.id}
+                          onToggleOpen={() => setOpenId(o => o === t.id ? null : t.id)}
+                          onDragStart={onDragStart} onMove={move} onDone={toggleDone} onRemove={remove} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {items.length > 0 && <span className="quad-n">{items.length}</span>}
-              </div>
-              {items.length === 0 ? (
-                <div className="quad-empty">Suelta tareas aquí</div>
-              ) : (
-                <div className="chips">
-                  {items.map(t => (
-                    <MatrixChip key={t.id} t={t} q={q}
-                      open={openId === t.id}
-                      onToggleOpen={() => setOpenId(o => o === t.id ? null : t.id)}
-                      onDragStart={onDragStart} onMove={move} onDone={toggleDone} onRemove={remove} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+        </div>
       </div>
       <div className="qa-hint" style={{ marginTop: 14, textAlign: "center" }}>
-        Las tareas están <b>colapsadas</b>. Toca una para abrirla, leerla y mover, completar o eliminar.
+        Arrastra cada tarea al cuadrante según su <b>urgencia</b> (eje horizontal) e <b>importancia</b> (eje vertical). Se clasifica sola en Q1–Q4.
       </div>
     </>
   );
@@ -946,11 +986,11 @@ function Sheet({ task, onClose, onMove, onDone, onRemove }) {
         <h3>{task.title}</h3>
         <div className="sub">{fmtMins(task.mins || 30)}{di ? " · " + di.text : ""}{task.note ? " · " + task.note : ""}</div>
         <div className="sheet-grid">
-          {QUAD_ORDER.map(q => {
+          {QUAD_GRID.map(q => {
             const Q = QUADS[q];
             return (
               <button key={q} className={"sheet-opt " + Q.cls} onClick={() => onMove(q)}>
-                {Q.label}<small>{Q.sub}</small>
+                <span className="sheet-q">Q{Q.num}</span>{Q.label}<small>{Q.sub}</small>
               </button>
             );
           })}

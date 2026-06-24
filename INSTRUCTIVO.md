@@ -102,21 +102,38 @@ La tarea aparecerá abajo en **"Sin clasificar"**, esperando a que la clasifique
 
 ## Paso 2 · Clasificar con la Matriz
 
-La **Matriz** distribuye tus tareas en 4 cuadrantes según **urgencia** e **importancia**.
+La **Matriz** distribuye tus tareas en 4 cuadrantes según **urgencia** (eje horizontal) e **importancia** (eje vertical), con la organización clásica de Eisenhower y cada cuadrante numerado de **Q1 a Q4**.
 
 ![Vista Matriz](docs/shot-matriz.png)
 
+### Cómo leer la matriz
+
+```
+                     ← No urgente        Urgente →
+                 ┌─────────────────┬─────────────────┐
+  Importante ↑   │   Q2 · AGENDAR  │  Q1 · HACER YA  │
+                 ├─────────────────┼─────────────────┤
+  No importante ↓│  Q4 · ELIMINAR  │  Q3 · DELEGAR   │
+                 └─────────────────┴─────────────────┘
+```
+
+- **Eje vertical** (↑↓): arriba = Importante · abajo = No importante
+- **Eje horizontal** (←→): izquierda = No urgente · derecha = Urgente
+- Cada cuadrante tiene su **badge Q1–Q4** y su etiqueta (Hacer ya, Agendar, Delegar, Eliminar).
+
 ### Cómo clasificar una tarea
+
+Al soltar una tarea en un cuadrante, **se clasifica automáticamente** en su categoría:
 
 **En computadora (arrastrar):**
 1. Ve a la pestaña **Matriz**.
-2. Arrastra la tarea desde "Sin clasificar" (o desde otro cuadrante) hacia el cuadrante que corresponda.
-3. Suelta. La tarea queda ahí.
+2. Arrastra la tarea desde "Sin clasificar" (o desde otro cuadrante) hacia el cuadrante que corresponda según su urgencia e importancia.
+3. Suelta. La tarea queda asignada a ese Q1–Q4.
 
 **En celular (tocar):**
 1. Toca la tarea que quieres clasificar.
-2. Se abre un **panel** abajo con las 4 opciones.
-3. Toca el cuadrante destino: **Hacer ya**, **Agendar**, **Delegar** o **Eliminar**.
+2. Se abre un **panel** abajo con las 4 opciones numeradas (Q1–Q4).
+3. Toca el cuadrante destino: **Q1 Hacer ya**, **Q2 Agendar**, **Q3 Delegar** o **Q4 Eliminar**.
 
 ### Revisar una tarea dentro de la matriz
 
@@ -191,12 +208,12 @@ Esta es la ventaja clave: puedes, en un solo rato, **capturar y programar toda l
 
 ## Los 4 cuadrantes de Eisenhower
 
-| Cuadrante | Color | Significado | Qué hacer |
-|---|---|---|---|
-| **HACER YA** | 🔴 | Urgente **e** importante | Hazlo hoy, cuanto antes |
-| **AGENDAR** | 🔵 | Importante, **no** urgente | Programarlo con tiempo, no dejarlo al último |
-| **DELEGAR** | 🟤 | Urgente, **no** importante | Pásalo a alguien del equipo |
-| **ELIMINAR** | ⚪ | Ni urgente ni importante | Revísalo; probablemente no aporta — elimínalo |
+| # | Cuadrante | Color | Significado | Qué hacer |
+|---|---|---|---|---|
+| **Q1** | **HACER YA** | 🔴 | Urgente **e** importante | Hazlo hoy, cuanto antes |
+| **Q2** | **AGENDAR** | 🔵 | Importante, **no** urgente | Programarlo con tiempo, no dejarlo al último |
+| **Q3** | **DELEGAR** | 🟤 | Urgente, **no** importante | Pásalo a alguien del equipo |
+| **Q4** | **ELIMINAR** | ⚪ | Ni urgente ni importante | Revísalo; probablemente no aporta — elimínalo |
 
 **Guía rápida para decidir:**
 - ¿Pasa algo grave si no lo hago hoy? → **Urgente**
